@@ -1,3 +1,5 @@
+// Package deb provides helpers to interact with data and metadata
+// hidden in debian packages.
 package deb
 
 import (
@@ -15,32 +17,34 @@ import (
 	"strings"
 )
 
+// Package represents a debian Package on disk
 type Package struct {
 	Name, Version, Arch string
 
-	filename   string
+	file       string
 	readone    bool
 	archive    *tar.Reader
 	fieldcache godebiancontrol.Paragraph
 }
 
-func NewPackage(filename string) *Package {
-	basename := filepath.Base(filename)
+// NewPackage provides information of a debian Package on disk
+func NewPackage(file string) *Package {
+	basename := filepath.Base(file)
 	split := strings.Split(basename, "_")
 	if len(split) != 3 {
 		return nil
 	}
 	return &Package{
-		Name:     split[0],
-		Version:  strings.Replace(split[1], "%", ":", -1),
-		Arch:     strings.TrimSuffix(split[2], ".deb"),
-		filename: filename,
+		Name:    split[0],
+		Version: strings.Replace(split[1], "%", ":", -1),
+		Arch:    strings.TrimSuffix(split[2], ".deb"),
+		file:    file,
 	}
 
 }
 
 func (p *Package) updateFieldCache() error {
-	cmd := exec.Command("dpkg-deb", "--field", p.filename)
+	cmd := exec.Command("dpkg-deb", "--field", p.file)
 
 	o, err := cmd.Output()
 	if err != nil {
@@ -62,6 +66,7 @@ func (p *Package) updateFieldCache() error {
 	return nil
 }
 
+// Source package this Debian package was generated from
 func (p *Package) Source() (string, error) {
 	if p.fieldcache == nil {
 		err := p.updateFieldCache()
@@ -76,7 +81,7 @@ func (p *Package) archiveOpen() (*tar.Reader, error) {
 	if p.archive != nil {
 		return p.archive, nil
 	}
-	cmd := exec.Command("dpkg-deb", "--fsys-tarfile", p.filename)
+	cmd := exec.Command("dpkg-deb", "--fsys-tarfile", p.file)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, err
@@ -96,7 +101,8 @@ func (p *Package) archiveOpen() (*tar.Reader, error) {
 	return p.archive, nil
 }
 
-func (p *Package) FindFile(filename string) (io.ReadCloser, error) {
+// Find a file archived in this Debian package
+func (p *Package) Find(file string) (io.ReadCloser, error) {
 	archive, err := p.archiveOpen()
 	if err != nil {
 		return nil, err
@@ -127,12 +133,11 @@ func (p *Package) FindFile(filename string) (io.ReadCloser, error) {
 			// b0rken tar archive
 			return nil, err
 		}
-		if fi := hdr.FileInfo(); fi.Name() == filename {
+		if fi := hdr.FileInfo(); fi.Name() == file {
 			if fi.Mode().IsRegular() {
 				return gzip.NewReader(archive)
-			} else {
-				return nil, os.ErrInvalid
 			}
+			return nil, os.ErrInvalid
 		}
 	}
 	panic("Never reached")

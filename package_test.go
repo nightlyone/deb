@@ -61,7 +61,7 @@ func TestFindChangelog(t *testing.T) {
 	pack := NewPackage(filename)
 
 	clname := "./usr/share/doc/" + pack.Name + "/changelog.Debian.gz"
-	r, err := pack.FindFile(clname)
+	r, err := pack.Find(clname)
 	if err != nil {
 		t.Error("Cannot load package changelog, reason", err)
 		return
