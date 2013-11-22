@@ -22,7 +22,7 @@ type Change struct {
 	Changes []byte
 }
 
-// Change describes a full or partial changelog
+// Changelog describes a full or partial changelog
 type Changelog []Change
 
 // Parse a debian changelog from r for any changes happening later than afterVersion
