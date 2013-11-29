@@ -1,5 +1,6 @@
 // Package changelog provides helpers to parse a typical
 // Debian changelog file found in packages generated from source packages.
+// see http://www.debian.org/doc/debian-policy/ch-source.html for details on the format
 package changelog
 
 import (
