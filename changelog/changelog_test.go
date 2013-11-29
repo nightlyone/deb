@@ -2,6 +2,7 @@ package changelog
 
 import (
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -45,4 +46,51 @@ func TestParseChangelogUntil(t *testing.T) {
 	if got != want {
 		t.Errorf("got %d changelog entries, want %d", got, want)
 	}
+}
+
+func TestParseVersionLine(t *testing.T) {
+	for i, test := range versionLines {
+		change := Change{}
+		ok := change.parseVersionLine([]byte(test.line))
+		if ok && test.bad {
+			t.Errorf("%d: did parse %q, but shouldn't", i, test.line)
+		} else if !ok && !test.bad {
+			t.Errorf("%d: cannot parse %q", i, test.line)
+		}
+		if ok && !reflect.DeepEqual(test.want, change) {
+			t.Errorf("%d: want:\n%v\n, got:\n%v\n", i, test.want, change)
+		}
+	}
+}
+
+var versionLines = []struct {
+	line string
+	bad  bool
+	want Change
+}{
+	{
+
+		line: "golang (2:1.1.2-2ubuntu1) saucy; urgency=low",
+		want: Change{
+			Source:  "golang",
+			Version: "2:1.1.2-2ubuntu1",
+			Dist:    "saucy",
+			Urgency: "low",
+		},
+	},
+	{
+
+		line: "golang (2:1.1.2-2ubuntu1) saucy; urgency=low",
+		want: Change{
+			Source:  "golang",
+			Version: "2:1.1.2-2ubuntu1",
+			Dist:    "saucy",
+			Urgency: "low",
+		},
+	},
+	{
+
+		line: "golang (2:1.1.2-2ubuntu1) ; urgency=low",
+		bad:  true,
+	},
 }
