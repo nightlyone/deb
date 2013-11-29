@@ -70,11 +70,11 @@ var versionLines = []struct {
 }{
 	{
 
-		line: "golang (2:1.1.2-2ubuntu1) saucy; urgency=low",
+		line: "golang (2:1.1.2-2ubuntu1) saucy intrepid; urgency=low",
 		want: Change{
 			Source:  "golang",
 			Version: "2:1.1.2-2ubuntu1",
-			Dist:    "saucy",
+			Dists:   []string{"saucy", "intrepid"},
 			Urgency: "low",
 		},
 	},
@@ -84,7 +84,7 @@ var versionLines = []struct {
 		want: Change{
 			Source:  "golang",
 			Version: "2:1.1.2-2ubuntu1",
-			Dist:    "saucy",
+			Dists:   []string{"saucy"},
 			Urgency: "low",
 		},
 	},

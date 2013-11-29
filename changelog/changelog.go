@@ -15,7 +15,7 @@ import (
 type Change struct {
 	Source  string
 	Version string
-	Dist    string
+	Dists   []string
 	Urgency string
 	Author  string
 	Email   string
@@ -27,20 +27,27 @@ type Change struct {
 type Changelog []Change
 
 func (change *Change) parseVersionLine(b []byte) (ok bool) {
-
-	// FIXME: This is wrong, because Dist is actually a space seperated list
-	f := bytes.Fields(b)
-	if len(f) < 4 {
+	split := bytes.SplitN(b, []byte{';'}, 2)
+	f := bytes.Fields(split[0])
+	if len(f) < 3 || len(split) != 2 {
 		return false
 	}
-	s, v, d, u := f[0], f[1], f[2], f[3]
+	u := split[1]
+	s, v, d := f[0], f[1], f[2:]
+
 	change.Version = string(bytes.Trim(v, "()"))
-
 	change.Source = string(s)
-	change.Dist = string(bytes.TrimRight(d, ";"))
-	change.Urgency = string(bytes.TrimPrefix(u, []byte("urgency=")))
+	change.Urgency = string(bytes.TrimPrefix(bytes.TrimSpace(u), []byte("urgency=")))
 
-	return change.Version != "" && change.Source != "" && change.Dist != ""
+	change.Dists = nil
+	for _, dist := range d {
+		change.Dists = append(change.Dists, string(dist))
+	}
+
+	return change.Version != "" &&
+		change.Source != "" &&
+		len(change.Dists) > 0 &&
+		change.Urgency != ""
 }
 
 func (change *Change) parseChangedByLine(b []byte) (ok bool) {
