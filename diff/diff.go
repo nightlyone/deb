@@ -55,7 +55,7 @@ func (p bySource) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 // Changes are returned as list of added, removed and updated packages.
 func Changes(newer, older *List) (added, removed, updated []*Package) {
 	for pkg, src := range newer.Package {
-		old_src, exists := older.Package[pkg]
+		old, exists := older.Package[pkg]
 		after := newer.Version[pkg]
 		if !exists {
 			added = append(added, &Package{
@@ -66,7 +66,7 @@ func Changes(newer, older *List) (added, removed, updated []*Package) {
 			continue
 		}
 		before := older.Version[pkg]
-		if after != before || src != old_src {
+		if after != before || src != old {
 			updated = append(updated, &Package{
 				Name:    pkg,
 				Source:  src,
@@ -74,13 +74,13 @@ func Changes(newer, older *List) (added, removed, updated []*Package) {
 			})
 		}
 	}
-	for pkg, old_src := range older.Package {
+	for pkg, old := range older.Package {
 		_, exists := newer.Package[pkg]
 		before := older.Version[pkg]
 		if !exists {
 			removed = append(removed, &Package{
 				Name:    pkg,
-				Source:  old_src,
+				Source:  old,
 				Version: before,
 			})
 		}

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func open_fixture(t *testing.T, name string) (io.Reader, func()) {
+func openFixture(t *testing.T, name string) (io.Reader, func()) {
 	r, err := os.Open(filepath.Join("./fixtures", name))
 	if err != nil {
 		t.Fatalf("Cannot read fixture %q", name)
@@ -19,7 +19,7 @@ func open_fixture(t *testing.T, name string) (io.Reader, func()) {
 
 func TestParse(t *testing.T) {
 	fixture := "old.Packages"
-	r, cleanup := open_fixture(t, fixture)
+	r, cleanup := openFixture(t, fixture)
 	defer cleanup()
 
 	list, err := NewList(r)
@@ -32,22 +32,18 @@ func TestParse(t *testing.T) {
 }
 
 func TestDiff(t *testing.T) {
-	fixture_old := "old.Packages"
-	r_old, cleanup_old := open_fixture(t, fixture_old)
-	defer cleanup_old()
-	fixture_new := "new.Packages"
-	r_new, cleanup_new := open_fixture(t, fixture_new)
-	defer cleanup_new()
+	lists := map[string]*List{}
+	for _, s := range []string{"old", "new"} {
+		r, cleanup := openFixture(t, s+".Packages")
+		defer cleanup()
+		list, err := NewList(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		lists[s] = list
+	}
 
-	older, err := NewList(r_old)
-	if err != nil {
-		t.Fatal(err)
-	}
-	newer, err := NewList(r_new)
-	if err != nil {
-		t.Fatal(err)
-	}
-	a, r, u := Changes(newer, older)
+	a, r, u := Changes(lists["new"], lists["old"])
 	var changes = []struct {
 		what string
 		got  []*Package
