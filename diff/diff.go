@@ -1,3 +1,4 @@
+// Package diff calculates changes in Debian package lists.
 package diff
 
 import (
@@ -7,11 +8,13 @@ import (
 	"github.com/stapelberg/godebiancontrol"
 )
 
+// A List of packages in a format useful for postprocessing
 type List struct {
 	Version map[string]string // Version for each package
 	Package map[string]string // Package to source mapping
 }
 
+// NewList reads a package list from r
 func NewList(r io.Reader) (*List, error) {
 	pp, err := godebiancontrol.Parse(r)
 	if err != nil {
@@ -37,16 +40,19 @@ func NewList(r io.Reader) (*List, error) {
 	return l, nil
 }
 
+// Package succintly describes a package
 type Package struct {
 	Name, Source, Version string
 }
 
+// Sort package list by Source package of Package
 type bySource []*Package
 
 func (p bySource) Len() int           { return len(p) }
 func (p bySource) Less(i, j int) bool { return p[i].Source < p[j].Source }
 func (p bySource) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
+// Changes are returned as list of added, removed and updated packages.
 func Changes(newer, older *List) (added, removed, updated []*Package) {
 	for pkg, src := range newer.Package {
 		old_src, exists := older.Package[pkg]
@@ -82,12 +88,18 @@ func Changes(newer, older *List) (added, removed, updated []*Package) {
 	return
 }
 
+// Update describe an updated Package and updates related to it
 type Update struct {
 	Package string
 	Version string
 	Related []*Package
 }
 
+// CompressUpdates detects updates of the same source package
+// to the same version and considers them related.
+// This is useful for display of changes to the user.
+// e.g an update of 29 packages is actually just 5 different sets of updates,
+// where each has a bunch of related packages compiled from the same source package update.
 func CompressUpdates(changes []*Package) (update []*Update) {
 	if len(changes) == 0 {
 		return nil
