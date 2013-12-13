@@ -9,8 +9,9 @@ func TestRepositoryPackageListNames(t *testing.T) {
 		return
 	}
 
-	testListing(t, "0", r.PackageListNames("0"), defaultRepositoryPackageListNames)
-	testListing(t, "", r.PackageListNames(""), defaultRepositoryPackageListNamesUntagged)
+	testListing(t, "", r.PackageListNames(), defaultRepositoryPackageListNamesUntagged)
+	r.DebMirrorTag = "0"
+	testListing(t, "0", r.PackageListNames(), defaultRepositoryPackageListNames)
 }
 
 func TestRepositoryTranslationListNames(t *testing.T) {
@@ -20,8 +21,9 @@ func TestRepositoryTranslationListNames(t *testing.T) {
 		return
 	}
 
-	testListing(t, "0", r.TranslationListNames("0"), defaultRepositoryTranslationListNames)
-	testListing(t, "", r.TranslationListNames(""), defaultRepositoryTranslationListNamesUntagged)
+	testListing(t, "", r.TranslationListNames(), defaultRepositoryTranslationListNamesUntagged)
+	r.DebMirrorTag = "0"
+	testListing(t, "0", r.TranslationListNames(), defaultRepositoryTranslationListNames)
 }
 
 func testListing(t *testing.T, debmirrorTag string, gotNames, wantNames []string) {

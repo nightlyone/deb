@@ -9,6 +9,7 @@ type Repository struct {
 	Archs,
 	Dists []string
 	Translations []string
+	DebMirrorTag string // support local directory layout for debmirror
 }
 
 // New inits repository for usage
@@ -29,7 +30,8 @@ var ListExtensions = []string{
 }
 
 // PackageListNames lists all possible locations for package lists
-func (r *Repository) PackageListNames(debmirrorTag string) (names []string) {
+func (r *Repository) PackageListNames() (names []string) {
+	debmirrorTag := r.DebMirrorTag
 	if debmirrorTag != "" {
 		debmirrorTag = "/" + debmirrorTag
 	}
@@ -49,7 +51,8 @@ func (r *Repository) PackageListNames(debmirrorTag string) (names []string) {
 }
 
 // TranslationListNames lists all possible locations for translation lists
-func (r *Repository) TranslationListNames(debmirrorTag string) (names []string) {
+func (r *Repository) TranslationListNames() (names []string) {
+	debmirrorTag := r.DebMirrorTag
 	if debmirrorTag != "" {
 		debmirrorTag = "/" + debmirrorTag
 	}
