@@ -29,13 +29,16 @@ var ListExtensions = []string{
 }
 
 // PackageListNames lists all possible locations for package lists
-func (r *Repository) PackageListNames(tag string) (names []string) {
+func (r *Repository) PackageListNames(debmirrorTag string) (names []string) {
+	if debmirrorTag != "" {
+		debmirrorTag = "/" + debmirrorTag
+	}
 	for _, section := range r.Sections {
 		for _, arch := range r.Archs {
 			for _, dist := range r.Dists {
 				for _, ext := range ListExtensions {
 					///security.debian.org/dists/squeeze/updates/non-free/binary-amd64/Packages.bz2
-					name := fmt.Sprintf("/dists/%s/%s/binary-%s/Packages%s", dist, section, arch, ext)
+					name := fmt.Sprintf("/dists/%s%s/%s/binary-%s/Packages%s", dist, debmirrorTag, section, arch, ext)
 					names = append(names, name)
 				}
 
@@ -46,14 +49,16 @@ func (r *Repository) PackageListNames(tag string) (names []string) {
 }
 
 // TranslationListNames lists all possible locations for translation lists
-func (r *Repository) TranslationListNames(tag string) (names []string) {
+func (r *Repository) TranslationListNames(debmirrorTag string) (names []string) {
+	if debmirrorTag != "" {
+		debmirrorTag = "/" + debmirrorTag
+	}
 	for _, section := range r.Sections {
 		for _, translation := range r.Translations {
 			for _, dist := range r.Dists {
 				for _, ext := range ListExtensions {
-					///security.debian.org/dists/squeeze/updates/non-free/binary-amd64/Packages.bz2
 					//ftp.uk.debian.org/debian/dists/wheezy/contrib/i18n/Translation-en.bz2
-					name := fmt.Sprintf("/dists/%s/%s/i18n/Translation-%s%s", dist, section, translation, ext)
+					name := fmt.Sprintf("/dists/%s%s/%s/i18n/Translation-%s%s", dist, debmirrorTag, section, translation, ext)
 					names = append(names, name)
 				}
 
