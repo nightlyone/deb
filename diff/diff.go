@@ -10,8 +10,9 @@ import (
 
 // A List of packages in a format useful for postprocessing
 type List struct {
-	Version map[string]string // Version for each package
-	Package map[string]string // Package to source mapping
+	Version  map[string]string // Version for each package
+	Package  map[string]string // Package to source mapping
+	Location map[string]string // Pool location of this package
 }
 
 // NewList reads a package list from r
@@ -21,13 +22,15 @@ func NewList(r io.Reader) (*List, error) {
 		return nil, err
 	}
 	l := &List{
-		Version: map[string]string{},
-		Package: map[string]string{},
+		Version:  map[string]string{},
+		Package:  map[string]string{},
+		Location: map[string]string{},
 	}
 	for _, e := range pp {
 		p := e["Package"]
 		v := e["Version"]
-		if p == "" || v == "" {
+		loc := e["Filename"]
+		if p == "" || v == "" || loc == "" {
 			continue
 		}
 		s, ok := e["Source"]
@@ -36,13 +39,14 @@ func NewList(r io.Reader) (*List, error) {
 		}
 		l.Package[p] = s
 		l.Version[p] = v
+		l.Location[p] = loc
 	}
 	return l, nil
 }
 
 // Package succintly describes a package
 type Package struct {
-	Name, Source, Version string
+	Name, Source, Version, Location string
 }
 
 // Sort package list by Source package of Package
@@ -57,31 +61,36 @@ func Changes(newer, older *List) (added, removed, updated []*Package) {
 	for pkg, src := range newer.Package {
 		old, exists := older.Package[pkg]
 		after := newer.Version[pkg]
+		loc := newer.Location[pkg]
 		if !exists {
 			added = append(added, &Package{
-				Name:    pkg,
-				Source:  src,
-				Version: after,
+				Name:     pkg,
+				Source:   src,
+				Version:  after,
+				Location: loc,
 			})
 			continue
 		}
 		before := older.Version[pkg]
 		if after != before || src != old {
 			updated = append(updated, &Package{
-				Name:    pkg,
-				Source:  src,
-				Version: after,
+				Name:     pkg,
+				Source:   src,
+				Version:  after,
+				Location: loc,
 			})
 		}
 	}
 	for pkg, old := range older.Package {
 		_, exists := newer.Package[pkg]
 		before := older.Version[pkg]
+		loc := older.Location[pkg]
 		if !exists {
 			removed = append(removed, &Package{
-				Name:    pkg,
-				Source:  old,
-				Version: before,
+				Name:     pkg,
+				Source:   old,
+				Version:  before,
+				Location: loc,
 			})
 		}
 	}

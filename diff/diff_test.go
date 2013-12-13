@@ -1,6 +1,7 @@
 package diff
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -17,6 +18,8 @@ func openFixture(t *testing.T, name string) (io.Reader, func()) {
 	return r, func() { r.Close() }
 }
 
+var listpackages = flag.Bool("listpackages", false, "use listpackages to debug changelog parsing")
+
 func TestParse(t *testing.T) {
 	fixture := "old.Packages"
 	r, cleanup := openFixture(t, fixture)
@@ -26,8 +29,24 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot parse %q", fixture)
 	}
-	for pkg, src := range list.Package {
-		t.Logf("%s=%s (%s)", pkg, list.Version[pkg], src)
+
+	count := 1656
+	if len(list.Package) != count {
+		t.Errorf("cannot parse packages. got %d, want %d")
+
+	}
+	if len(list.Version) != count {
+		t.Errorf("cannot parse versions. got %d, want %d")
+
+	}
+	if len(list.Location) != count {
+		t.Errorf("cannot parse locations. got %d, want %d")
+
+	}
+	if *listpackages {
+		for pkg, src := range list.Package {
+			t.Logf("%s=%s (%s) in %s", pkg, list.Version[pkg], src, list.Location[pkg])
+		}
 	}
 }
 
