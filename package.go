@@ -10,6 +10,7 @@ import (
 	"github.com/stapelberg/godebiancontrol"
 
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -133,12 +134,22 @@ func (p *Package) Find(file string) (io.ReadCloser, error) {
 			// b0rken tar archive
 			return nil, err
 		}
-		if fi := hdr.FileInfo(); fi.Name() == file {
-			if fi.Mode().IsRegular() {
-				return gzip.NewReader(archive)
-			}
-			return nil, os.ErrInvalid
+
+		// No match
+		if hdr.Name != file {
+			continue
 		}
+
+		// Only regular entries please
+		if hdr.FileInfo().Mode().IsRegular() {
+			switch filepath.Ext(file) {
+			case ".gz":
+				return gzip.NewReader(archive)
+			default:
+				return ioutil.NopCloser(archive), nil
+			}
+		}
+		return nil, os.ErrInvalid
 	}
 	panic("Never reached")
 }
