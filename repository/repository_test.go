@@ -1,8 +1,8 @@
-package mirror
+package repository
 
 import "testing"
 
-var defaultMirrorPackageListNames = []string{
+var defaultRepositoryPackageListNames = []string{
 	"/dists/stable/main/binary-none/Packages.bz2",
 	"/dists/stable/main/binary-none/Packages.gz",
 	"/dists/stable/main/binary-none/Packages",
@@ -17,7 +17,7 @@ var defaultMirrorPackageListNames = []string{
 	"/dists/stable/main/debian-installer/binary-none/Packages",
 }
 
-func TestMirrorPackageListNames(t *testing.T) {
+func TestRepositoryPackageListNames(t *testing.T) {
 	r, err := New()
 	if err != nil {
 		t.Fatal(err)
@@ -28,13 +28,13 @@ func TestMirrorPackageListNames(t *testing.T) {
 	if len(names) == 0 {
 		t.Error("List of package names is empty")
 	}
-	if len(names) != len(defaultMirrorPackageListNames) {
-		t.Errorf("length mismatch, got %d, expected %d", len(names), len(defaultMirrorPackageListNames))
+	if len(names) != len(defaultRepositoryPackageListNames) {
+		t.Errorf("length mismatch, got %d, expected %d", len(names), len(defaultRepositoryPackageListNames))
 	} else {
 		t.Logf("%d package lists will by tried", len(names))
 	}
 	for i, got := range names {
-		want := defaultMirrorPackageListNames[i]
+		want := defaultRepositoryPackageListNames[i]
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		} else {
@@ -43,7 +43,7 @@ func TestMirrorPackageListNames(t *testing.T) {
 	}
 }
 
-var defaultMirrorTranslationListNames = []string{
+var defaultRepositoryTranslationListNames = []string{
 	"/dists/stable/main/i18n/Translation-en.bz2",
 	"/dists/stable/main/i18n/Translation-en.gz",
 	"/dists/stable/main/i18n/Translation-en",
@@ -58,7 +58,7 @@ var defaultMirrorTranslationListNames = []string{
 	"/dists/stable/main/debian-installer/i18n/Translation-en",
 }
 
-func TestMirrorTranslationListNames(t *testing.T) {
+func TestRepositoryTranslationListNames(t *testing.T) {
 	r, err := New()
 	if err != nil {
 		t.Fatal(err)
@@ -69,13 +69,13 @@ func TestMirrorTranslationListNames(t *testing.T) {
 	if len(names) == 0 {
 		t.Error("List of package names is empty")
 	}
-	if len(names) != len(defaultMirrorTranslationListNames) {
-		t.Errorf("length mismatch, got %d, expected %d", len(names), len(defaultMirrorTranslationListNames))
+	if len(names) != len(defaultRepositoryTranslationListNames) {
+		t.Errorf("length mismatch, got %d, expected %d", len(names), len(defaultRepositoryTranslationListNames))
 	} else {
 		t.Logf("%d package lists will by tried", len(names))
 	}
 	for i, got := range names {
-		want := defaultMirrorTranslationListNames[i]
+		want := defaultRepositoryTranslationListNames[i]
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		} else {

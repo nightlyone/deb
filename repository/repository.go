@@ -1,18 +1,18 @@
-// Package mirror supports a debian mirror according to https://wiki.debian.org/RepositoryFormat
-package mirror
+// Package repository supports a debian repository according to https://wiki.debian.org/RepositoryFormat
+package repository
 
 import "fmt"
 
-// Mirror models a debian repository Mirror
-type Mirror struct {
+// Repository models a debian repository Repository
+type Repository struct {
 	Sections,
 	Archs,
 	Dists []string
 	Translations []string
 }
 
-func New() (*Mirror, error) {
-	return &Mirror{
+func New() (*Repository, error) {
+	return &Repository{
 		Sections:     []string{"main", "contrib", "non-free", "main/debian-installer"},
 		Archs:        []string{"none"},
 		Dists:        []string{"stable"},
@@ -27,7 +27,7 @@ var ListExtensions = []string{
 	"",
 }
 
-func (r *Mirror) PackageListNames(tag string) (names []string) {
+func (r *Repository) PackageListNames(tag string) (names []string) {
 	for _, section := range r.Sections {
 		for _, arch := range r.Archs {
 			for _, dist := range r.Dists {
@@ -43,7 +43,7 @@ func (r *Mirror) PackageListNames(tag string) (names []string) {
 	return
 }
 
-func (r *Mirror) TranslationListNames(tag string) (names []string) {
+func (r *Repository) TranslationListNames(tag string) (names []string) {
 	for _, section := range r.Sections {
 		for _, translation := range r.Translations {
 			for _, dist := range r.Dists {
