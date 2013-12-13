@@ -1,15 +1,21 @@
 package diff
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
-func openFixture(t *testing.T, name string) (io.Reader, func()) {
+type fatallogger interface {
+	Fatalf(format string, args ...interface{})
+}
+
+func openFixture(t fatallogger, name string) (io.Reader, func()) {
 	r, err := os.Open(filepath.Join("./fixtures", name))
 	if err != nil {
 		t.Fatalf("Cannot read fixture %q", name)
@@ -107,4 +113,32 @@ func TestDiff(t *testing.T) {
 		}
 		t.Error("compressed from", len(u), "to", len(cu), "expected", 5)
 	}
+}
+
+func BenchmarkNew(b *testing.B) {
+	fixture := "old.Packages"
+	fr, cleanup := openFixture(b, fixture)
+	buf, err := ioutil.ReadAll(fr)
+	cleanup()
+	if err != nil {
+		b.Fatalf("cannot read fixture %q because %q", fixture, err)
+	}
+	r := bytes.NewReader(buf)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+
+		end, _ := r.Seek(0, 2)
+		b.SetBytes(end)
+		r.Seek(0, 0)
+
+		b.StartTimer()
+
+		_, err := NewList(r)
+		if err != nil {
+			b.Fatalf("cannot parse fixture %q because %q", fixture, err)
+		}
+	}
+
 }
