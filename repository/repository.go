@@ -11,6 +11,7 @@ type Repository struct {
 	Translations []string
 }
 
+// New inits repository for usage
 func New() (*Repository, error) {
 	return &Repository{
 		Sections:     []string{"main", "contrib", "non-free", "main/debian-installer"},
@@ -27,6 +28,7 @@ var ListExtensions = []string{
 	"",
 }
 
+// PackageListNames lists all possible locations for package lists
 func (r *Repository) PackageListNames(tag string) (names []string) {
 	for _, section := range r.Sections {
 		for _, arch := range r.Archs {
@@ -43,6 +45,7 @@ func (r *Repository) PackageListNames(tag string) (names []string) {
 	return
 }
 
+// TranslationListNames lists all possible locations for translation lists
 func (r *Repository) TranslationListNames(tag string) (names []string) {
 	for _, section := range r.Sections {
 		for _, translation := range r.Translations {
