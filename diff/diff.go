@@ -44,6 +44,21 @@ func NewList(r io.Reader) (*List, error) {
 	return l, nil
 }
 
+// Merge list with other in place. Combined set will be in l then.
+func (l *List) Merge(other *List) {
+	for p, _ := range other.Package {
+		s := other.Package[p]
+		v := other.Version[p]
+		loc := other.Location[p]
+		if s == "" || v == "" || loc == "" {
+			continue
+		}
+		l.Package[p] = s
+		l.Version[p] = v
+		l.Location[p] = loc
+	}
+}
+
 // Package succintly describes a package
 type Package struct {
 	Name, Source, Version, Location string

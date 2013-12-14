@@ -115,6 +115,27 @@ func TestDiff(t *testing.T) {
 	}
 }
 
+func TestMerge(t *testing.T) {
+	lists := map[string]*List{}
+	for _, s := range []string{"old", "new"} {
+		r, cleanup := openFixture(t, s+".Packages")
+		defer cleanup()
+		list, err := NewList(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		lists[s] = list
+	}
+
+	n := lists["old"]
+	before := len(n.Package)
+	n.Merge(lists["new"])
+	after := len(n.Package)
+	if before == after {
+		t.Errorf("got before = %d, after = %d; want before = %d, after = %d\n", before, after, 1656, 1657)
+	}
+}
+
 func BenchmarkNew(b *testing.B) {
 	fixture := "old.Packages"
 	fr, cleanup := openFixture(b, fixture)
