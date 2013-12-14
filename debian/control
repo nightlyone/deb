@@ -1,0 +1,14 @@
+Source: deb
+Section: admin
+Priority: extra
+Maintainer: Ingo Oeser <nightlyone@googlemail.com>
+Build-Depends: debhelper (>= 8.0.0), golang-go, git-core, mercurial, rsync
+Standards-Version: 3.9.2
+Homepage: https://github.com/nightlyone/deb
+Vcs-Git: git://github.com/nightlyone/deb.git
+
+Package: deb
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Display changes on a debmirror
+ Debmirrors are nice, but display of changes is nicer.
