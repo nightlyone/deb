@@ -1,6 +1,10 @@
 package repository
 
-import "testing"
+import (
+	"reflect"
+	"sort"
+	"testing"
+)
 
 func TestRepositoryPackageListNames(t *testing.T) {
 	r, err := New()
@@ -24,6 +28,45 @@ func TestRepositoryTranslationListNames(t *testing.T) {
 	testListing(t, "", r.TranslationListNames(), defaultRepositoryTranslationListNamesUntagged)
 	r.DebMirrorTag = "0"
 	testListing(t, "0", r.TranslationListNames(), defaultRepositoryTranslationListNames)
+}
+
+func TestRepositoryKeySets(t *testing.T) {
+	r, err := New()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	r.Archs = []string{"amd64", "i386"}
+	r.DebMirrorTag = "0"
+
+	want := x86KeySets
+
+	got := r.KeySets()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("\n got\n%+v\nwant\n%+v\n", got, want)
+	}
+}
+
+func TestRepositoryUniqeKeys(t *testing.T) {
+	r, err := New()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	r.Archs = []string{"amd64", "i386"}
+	r.DebMirrorTag = "0"
+
+	want := []string{
+		"stable:amd64",
+		"stable:i386",
+	}
+
+	sort.Strings(want)
+
+	got := r.UniqueKeys()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("\n got\n%+v\nwant\n%+v\n", got, want)
+	}
 }
 
 func testListing(t *testing.T, debmirrorTag string, gotNames, wantNames []string) {
@@ -73,6 +116,37 @@ var defaultRepositoryPackageListNames = []string{
 	"/dists/stable/0/main/debian-installer/binary-none/Packages.bz2",
 	"/dists/stable/0/main/debian-installer/binary-none/Packages.gz",
 	"/dists/stable/0/main/debian-installer/binary-none/Packages",
+}
+
+var x86KeySets = map[string][]string{
+	"stable:amd64": {
+		"/dists/stable/0/main/binary-amd64/Packages.bz2",
+		"/dists/stable/0/main/binary-amd64/Packages.gz",
+		"/dists/stable/0/main/binary-amd64/Packages",
+		"/dists/stable/0/contrib/binary-amd64/Packages.bz2",
+		"/dists/stable/0/contrib/binary-amd64/Packages.gz",
+		"/dists/stable/0/contrib/binary-amd64/Packages",
+		"/dists/stable/0/non-free/binary-amd64/Packages.bz2",
+		"/dists/stable/0/non-free/binary-amd64/Packages.gz",
+		"/dists/stable/0/non-free/binary-amd64/Packages",
+		"/dists/stable/0/main/debian-installer/binary-amd64/Packages.bz2",
+		"/dists/stable/0/main/debian-installer/binary-amd64/Packages.gz",
+		"/dists/stable/0/main/debian-installer/binary-amd64/Packages",
+	},
+	"stable:i386": {
+		"/dists/stable/0/main/binary-i386/Packages.bz2",
+		"/dists/stable/0/main/binary-i386/Packages.gz",
+		"/dists/stable/0/main/binary-i386/Packages",
+		"/dists/stable/0/contrib/binary-i386/Packages.bz2",
+		"/dists/stable/0/contrib/binary-i386/Packages.gz",
+		"/dists/stable/0/contrib/binary-i386/Packages",
+		"/dists/stable/0/non-free/binary-i386/Packages.bz2",
+		"/dists/stable/0/non-free/binary-i386/Packages.gz",
+		"/dists/stable/0/non-free/binary-i386/Packages",
+		"/dists/stable/0/main/debian-installer/binary-i386/Packages.bz2",
+		"/dists/stable/0/main/debian-installer/binary-i386/Packages.gz",
+		"/dists/stable/0/main/debian-installer/binary-i386/Packages",
+	},
 }
 
 var defaultRepositoryTranslationListNamesUntagged = []string{

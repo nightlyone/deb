@@ -1,7 +1,10 @@
 // Package repository supports a debian repository according to https://wiki.debian.org/RepositoryFormat
 package repository
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // Repository models a debian repository Repository
 type Repository struct {
@@ -29,8 +32,11 @@ var ListExtensions = []string{
 	"",
 }
 
-// PackageListNames lists all possible locations for package lists
-func (r *Repository) PackageListNames() (names []string) {
+// PackageWalker can be iterates over all possible positions of packages
+type PackageVisitor func(dist, tag, section, arch, ext string)
+
+// ForEachPackageSpec iterates over all possible positions of packages
+func (r *Repository) ForEachPackageSpec(v PackageVisitor) {
 	debmirrorTag := r.DebMirrorTag
 	if debmirrorTag != "" {
 		debmirrorTag = "/" + debmirrorTag
@@ -39,19 +45,49 @@ func (r *Repository) PackageListNames() (names []string) {
 		for _, arch := range r.Archs {
 			for _, dist := range r.Dists {
 				for _, ext := range ListExtensions {
-					///security.debian.org/dists/squeeze/updates/non-free/binary-amd64/Packages.bz2
-					name := fmt.Sprintf("/dists/%s%s/%s/binary-%s/Packages%s", dist, debmirrorTag, section, arch, ext)
-					names = append(names, name)
+					v(dist, debmirrorTag, section, arch, ext)
 				}
 
 			}
 		}
 	}
-	return
 }
 
-// TranslationListNames lists all possible locations for translation lists
-func (r *Repository) TranslationListNames() (names []string) {
+// UniqueKeys returns the unqiue package list sets of a repository
+func (r *Repository) UniqueKeys() []string {
+	key := map[string]bool{}
+	r.ForEachPackageSpec(func(dist, tag, section, arch, ext string) {
+		key[dist+":"+arch] = true
+	})
+
+	keys := []string{}
+	for k := range key {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+
+}
+
+// KeySets returns how package lists can be merged
+// They are indexed by the values returned in UniqueKeys
+func (r *Repository) KeySets() map[string][]string {
+	set := map[string][]string{}
+	r.ForEachPackageSpec(func(dist, tag, section, arch, ext string) {
+		key := dist + ":" + arch
+		name := fmt.Sprintf("/dists/%s%s/%s/binary-%s/Packages%s", dist, tag, section, arch, ext)
+		set[key] = append(set[key], name)
+	})
+
+	return set
+
+}
+
+// TranslationWalker can be iterates over all possible positions of translations
+type TranslationVisitor func(dist, tag, section, translation, ext string)
+
+// ForEachTranslationSpec iterates over all possible positions of translations
+func (r *Repository) ForEachTranslationSpec(v TranslationVisitor) {
 	debmirrorTag := r.DebMirrorTag
 	if debmirrorTag != "" {
 		debmirrorTag = "/" + debmirrorTag
@@ -60,13 +96,30 @@ func (r *Repository) TranslationListNames() (names []string) {
 		for _, translation := range r.Translations {
 			for _, dist := range r.Dists {
 				for _, ext := range ListExtensions {
-					//ftp.uk.debian.org/debian/dists/wheezy/contrib/i18n/Translation-en.bz2
-					name := fmt.Sprintf("/dists/%s%s/%s/i18n/Translation-%s%s", dist, debmirrorTag, section, translation, ext)
-					names = append(names, name)
+					v(dist, debmirrorTag, section, translation, ext)
 				}
 
 			}
 		}
 	}
+}
+
+// PackageListNames lists all possible locations for package lists
+func (r *Repository) PackageListNames() (names []string) {
+	r.ForEachPackageSpec(func(dist, tag, section, arch, ext string) {
+		///security.debian.org/dists/squeeze/updates/non-free/binary-amd64/Packages.bz2
+		name := fmt.Sprintf("/dists/%s%s/%s/binary-%s/Packages%s", dist, tag, section, arch, ext)
+		names = append(names, name)
+	})
+	return
+}
+
+// TranslationListNames lists all possible locations for translation lists
+func (r *Repository) TranslationListNames() (names []string) {
+	r.ForEachTranslationSpec(func(dist, tag, section, translation, ext string) {
+		//ftp.uk.debian.org/debian/dists/wheezy/contrib/i18n/Translation-en.bz2
+		name := fmt.Sprintf("/dists/%s%s/%s/i18n/Translation-%s%s", dist, tag, section, translation, ext)
+		names = append(names, name)
+	})
 	return
 }
