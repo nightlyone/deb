@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-	repository.ListExtensions = []string{".gz", ""}
 	log.SetFlags(0)
 	_, e := parseFlags()
 

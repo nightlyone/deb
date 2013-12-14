@@ -145,9 +145,9 @@ func (b *Base) Packages(repo *repository.Repository) (combined map[string]*diff.
 }
 
 type Changeset struct {
-	Added,
-	Removed []*diff.Package
-	Updated []*diff.Update
+	Added   []*diff.Package `json:",omitempty"`
+	Removed []*diff.Package `json:",omitempty"`
+	Updated []*diff.Update  `json:",omitempty"`
 }
 
 var errIncompatible = errors.New("Incompatible package lists")
