@@ -1,7 +1,7 @@
 deb
 ===========
 
-Query puppetdb sane and dependency free.
+Various toolings around debian package lists, mirrors and changelogs
 
 [![Build Status][1]][2]
 [![GoDoc][3]][4]
