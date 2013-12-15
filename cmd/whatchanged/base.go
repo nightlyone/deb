@@ -84,7 +84,7 @@ func (b *Base) taggedRepository(r *repository.Repository) *repository.Repository
 	return &rep
 }
 
-func ReadList(r io.ReadCloser, ext string) (list *diff.List, err error) {
+func readList(r io.ReadCloser, ext string) (list *diff.List, err error) {
 	var reader io.Reader
 	defer r.Close()
 	switch ext {
@@ -114,7 +114,7 @@ func (b *Base) loadMergableLists(mergable []string) (combined *diff.List, err er
 		if err != nil {
 			return nil, err
 		}
-		list, err = ReadList(f, path.Ext(fn))
+		list, err = readList(f, path.Ext(fn))
 		if err != nil {
 			return nil, err
 		}
