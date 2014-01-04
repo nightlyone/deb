@@ -62,3 +62,7 @@ References:
 [7]: http://golang.org/doc/install
 [8]: https://codebot.io/badge/github.com/nightlyone/deb.png
 [9]: http://codebot.io/doc/pkg/github.com/nightlyone/deb
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/nightlyone/deb/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
